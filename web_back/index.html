@@ -104,5 +104,29 @@
 
     </script>
 
+    <script>
+        $(function(){
+            $('.icon-tuichu').parent().click(function(e){
+                // 阻止a标签的默认跳转行为
+                e.preventDefault();
+                $.post({
+                    url : 'http://localhost:8000/admin/logout',
+                    success : function(res){
+                        if(res.code == 200)
+                            location.href = 'login.html';
+                    }
+                });
+            });
+
+            $.get({
+                url : 'http://localhost:8000/admin/getuser',
+                success : function(res){
+                    $('.user_info').children('img').attr('src',res.data.user_pic);
+                    $('.user_info').children('span').html('欢迎&nbsp;&nbsp;'+ res.data.nickname);
+                    $('.user_center_link').children('img').attr('src',res.data.user_pic);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
