@@ -72,7 +72,8 @@
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-center">
-                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#addModal">新增分类</a>
+                            <a href="#" class="btn btn-success btn-add" data-toggle="modal"
+                                data-target="#addModal">新增分类</a>
                         </td>
                     </tr>
                 </tfoot>
@@ -89,13 +90,14 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        <input type="hidden" name='id' class="fl_id">
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">分类名称:</label>
-                            <input type="text" class="form-control fl_name">
+                            <input type="text" name='name' class="form-control fl_name">
                         </div>
                         <div class="form-group">
                             <label for="message-text" class="control-label">分类别名:</label>
-                            <input type="text" class="form-control fl_slug">
+                            <input type="text" name='slug' class="form-control fl_slug">
                         </div>
                     </form>
                 </div>
@@ -107,24 +109,25 @@
         </div>
     </div>
 
-    
+
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title" id="myModalLabel">温馨提示</h4>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">温馨提示</h4>
+                </div>
+                <div class="modal-body">
+                    确认需要删除吗
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default cancel" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary confirm">确认</button>
+                </div>
             </div>
-            <div class="modal-body">
-              确认需要删除吗
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default cancel" data-dismiss="modal">取消</button>
-              <button type="button" class="btn btn-primary confirm">确认</button>
-            </div>
-          </div>
         </div>
-      </div>
+    </div>
     <script>
         $('#addModal').modal({
             show: false,
@@ -136,12 +139,6 @@
             $('#addModal').modal('hide');
         });
 
-        $('.category_table').delegate('a', 'click', function () {
-            if ($(this).hasClass('btn-info')) {
-                $('#addModal .modal-title').html('修改分类名称');
-                $('#addModal').modal('show');
-            }
-        })      
     </script>
 
     <!-- 导入模板js文件 -->
@@ -178,60 +175,87 @@
             // 当进入文章分类信息,就发送ajax请求,获取所有的文章分类信息
             getData();
 
-            // 当新增成功后,保存新增的类别并展现在页面上
+            // 点击新增类别,弹出模态框 
+            $('.btn-add').on('click', function () {
+                $('#addModal .modal-title').html('新增分类');
+                $('#addModal .btn-primary').removeClass('btn-success').text('新增');
+            });
+
+            // 确认/修改按钮被点击后根据是否有btn-success类判断 是确认还是修改,从而发送不同的ajax请求
             $('#model_add').on('click', function () {
-                var fl_name = $('.fl_name').val().trim();
-                var fl_slug = $('.fl_slug').val().trim();
-                $.post({
-                    url: 'http://localhost:8000/admin/category_add',
-                    data: {
-                        name: fl_name,
-                        slug: fl_slug
-                    },
-                    success: function (res) {
-                        if (res.code == 200) {
-            
-                            // 1.刷新当前页面,将新添加的类别和名称展现在页面上
-                            // location.reload();
-                            // 2.重新发送ajax请求读取文章分类信息,并将其展现在页面上
-                            // 由于和刷新页面一样需要重新发送ajax请求,当文件过大时,可能会对性能造成影响
+                if ($(this).hasClass('btn-success')) {
+                    var str = $('.modal-body form').serialize();
+                    $.post({
+                        url : 'http://localhost:8000/admin/category_edit',
+                        data : str,
+                        success : function(backData){
                             getData();
-                            // 3.将当前的数据追加至最后
-                            // var obj = {
-                            //     name : fl_name,
-                            //     slug : fl_slug
-                            // }
-                            // var msg = template('tpl2',obj);
-                            // $('tbody').append(msg);
                         }
-                    }
-                });
+                    });
+                    
+                } else {
+                    var fl_name = $('.fl_name').val().trim();
+                    var fl_slug = $('.fl_slug').val().trim();
+                    $.post({
+                        url: 'http://localhost:8000/admin/category_add',
+                        data: {
+                            name: fl_name,
+                            slug: fl_slug
+                        },
+                        success: function (res) {
+                            if (res.code == 200) {
+
+                                // 1.刷新当前页面,将新添加的类别和名称展现在页面上
+                                // location.reload();
+                                // 2.重新发送ajax请求读取文章分类信息,并将其展现在页面上
+                                // 由于和刷新页面一样需要重新发送ajax请求,当文件过大时,可能会对性能造成影响
+                                getData();
+                                // 3.将当前的数据追加至最后
+                                // var obj = {
+                                //     name : fl_name,
+                                //     slug : fl_slug
+                                // }
+                                // var msg = template('tpl2',obj);
+                                // $('tbody').append(msg);
+                            }
+                        }
+                    });
+
+                }
 
                 $('#addModal').modal('hide');
             });
 
-
             // 点击删除按钮删除
-            $('tbody').on('click','.btn-danger',function(){
+            $('tbody').on('click', '.btn-danger', function () {
                 $('#myModal').modal();
                 var that = this;
                 // 当用户确认删除的时候,通过自定属性data-id 拿到id 并发送ajax请求删除数据
-                $('.confirm').on('click',function(){
+                $('.confirm').on('click', function () {
                     var id = $(that).attr('data-id');
                     $.post({
-                        url : 'http://localhost:8000/admin/category_delete',
-                        data : {
-                            'id' : id
+                        url: 'http://localhost:8000/admin/category_delete',
+                        data: {
+                            'id': id
                         },
-                        success : function(backData){
-                            if(backData.code == 200)
-                                getData();
+                        success: function (backData) {
+                            if (backData.code == 200)
+                                $(that).parents('tr').remove();
                         }
                     });
-                    
-
                     $('#myModal').modal('hide');
                 });
+            });
+
+            // 点击编辑,通过点击的id获取到数据并展现在页面上进行修改
+            $('tbody').on('click', '.btn-info', function () {
+                $('#addModal .modal-title').html('修改分类');
+                $('#addModal .btn-primary').addClass('btn-success').text('修改');
+                $('.fl_id').val($(this).attr('data-id'));
+                $('.fl_slug').val($(this).parent().prev().text());
+                $('.fl_name').val($(this).parent().prev().prev().text());
+
+                $('#addModal').modal('show');
             });
 
         });
