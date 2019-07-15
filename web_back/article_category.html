@@ -107,6 +107,24 @@
         </div>
     </div>
 
+    
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title" id="myModalLabel">温馨提示</h4>
+            </div>
+            <div class="modal-body">
+              确认需要删除吗
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default cancel" data-dismiss="modal">取消</button>
+              <button type="button" class="btn btn-primary confirm">确认</button>
+            </div>
+          </div>
+        </div>
+      </div>
     <script>
         $('#addModal').modal({
             show: false,
@@ -135,23 +153,11 @@
             <td>{{ v.name }}</td>
             <td>{{ v.slug }}</td>
             <td class="text-center">
-                <a href="javascript:editTr({&quot;id&quot;:&quot;1&quot;,&quot;slug&quot;:&quot;uncategorized&quot;,&quot;name&quot;:&quot;未分类&quot;});"
-                        class="btn btn-info btn-xs">编辑</a>
-                <a href="javascript:deleteTr( {{ v.id }} );" class="btn btn-danger btn-xs">删除</a>
+                <a href="javascript:" data-id = "{{ v.id }}" class="btn btn-info btn-xs">编辑</a>
+                <a href="javascript:" data-id = "{{ v.id }}" class="btn btn-danger btn-xs">删除</a>
             </td>
         </tr>
         {{ /each }}
-    </script>
-    <script type="text/html" id="tpl2">
-        <tr>
-            <td>{{ name }}</td>
-            <td>{{ slug }}</td>
-            <td class="text-center">
-                <a href="javascript:editTr({&quot;id&quot;:&quot;1&quot;,&quot;slug&quot;:&quot;uncategorized&quot;,&quot;name&quot;:&quot;未分类&quot;});"
-                        class="btn btn-info btn-xs">编辑</a>
-                <a href="javascript:deleteTr( 1 );" class="btn btn-danger btn-xs">删除</a>
-            </td>
-        </tr>
     </script>
 
     <script>
@@ -189,14 +195,14 @@
                             // location.reload();
                             // 2.重新发送ajax请求读取文章分类信息,并将其展现在页面上
                             // 由于和刷新页面一样需要重新发送ajax请求,当文件过大时,可能会对性能造成影响
-                            // getData();
+                            getData();
                             // 3.将当前的数据追加至最后
-                            var obj = {
-                                name : fl_name,
-                                slug : fl_slug
-                            }
-                            var msg = template('tpl2',obj);
-                            $('tbody').append(msg);
+                            // var obj = {
+                            //     name : fl_name,
+                            //     slug : fl_slug
+                            // }
+                            // var msg = template('tpl2',obj);
+                            // $('tbody').append(msg);
                         }
                     }
                 });
@@ -207,19 +213,24 @@
 
             // 点击删除按钮删除
             $('tbody').on('click','.btn-danger',function(){
-                var str = $(this).attr('href').split('(')[1].trim();
-                var id = parseInt(str[0]);
-    
-                $.post({
-                    url : 'http://localhost:8000/admin/category_delete',
-                    data : {
-                        id : id
-                    },
-                    success : function(res){
-                        if(res.code == 200){
-
+                $('#myModal').modal();
+                var that = this;
+                // 当用户确认删除的时候,通过自定属性data-id 拿到id 并发送ajax请求删除数据
+                $('.confirm').on('click',function(){
+                    var id = $(that).attr('data-id');
+                    $.post({
+                        url : 'http://localhost:8000/admin/category_delete',
+                        data : {
+                            'id' : id
+                        },
+                        success : function(backData){
+                            if(backData.code == 200)
+                                getData();
                         }
-                    }
+                    });
+                    
+
+                    $('#myModal').modal('hide');
                 });
             });
 
