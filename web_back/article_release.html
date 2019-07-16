@@ -13,7 +13,9 @@
     <link type="text/css" rel="stylesheet" href="js/jedate/css/jedate.css">
     <script src="js/jquery-1.12.4.min.js"></script>
     <script src="js/jedate/js/jedate.js"></script>
-
+    <!-- 导入模板js文件 -->
+    <script src="./js/template-web.js"></script>
+    <script src="./js/moment.js"></script>
     <script src="js/tinymce/js/tinymce/tinymce.min.js"></script>
     <script src="js/tinymce/js/tinymce_setup.js"></script>
 </head>
@@ -41,7 +43,7 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control">
+                        <select class="form-control" id = "art_control">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
@@ -53,9 +55,8 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">发布时间：</label>
                     <div class="col-sm-4">
-
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="YYYY-MM-DD" id="dateinput">
+                            <input type="text" class="form-control currentDate" placeholder="YYYY-MM-DD" id="dateinput">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button"
                                     onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
@@ -82,6 +83,14 @@
         </div>
     </div>
 
+    <!-- 写一个模板 -->
+    <script type = "text/html" id = "art_category">
+        {{ each data v}}
+        <option value = "{{ v.id }}">{{ v.name }}</option>
+        {{ /each }}
+    </script>
+
+
     <script>
         $(function(){
 
@@ -90,6 +99,21 @@
                 var url = URL.createObjectURL(this.files[0]);
                 $('#file_img').attr('src',url);
             });
+
+            // 当页面加载成功后,获取文章类别并展现在页面上
+            $.get({
+                url : 'http://localhost:8000/admin/category_search',
+                success : function(backData){
+                    if(backData.code == 200){
+                        var res = template('art_category',backData);
+                        $('#art_control').html(res);
+                    }
+                }
+            });
+
+            // 当页面加载成功后,moment.js插件获取指定格式的时间并展示在页面上
+           var currentDateStr = moment().format('YYYY-MM-DD');
+           $('.currentDate').val(currentDateStr);
         });
     </script>
 
