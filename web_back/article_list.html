@@ -325,7 +325,24 @@
                 getData(1);
             });
 
-            function getData(page){
+            // 分页  设置默认最大页码数为10
+            var total_pages = 10;   
+
+            var $pagination = $('.pagination');
+            var defaultOpts = {
+                totalPages: total_pages,
+                visiblePages: 5,
+                first: '首页',
+                last: '尾页',
+                prev: '上一页',
+                next: '下一页',
+                onPageClick: function (event, page) {
+                    getData(page);
+                }
+            };
+            $pagination.twbsPagination(defaultOpts);
+
+            function getData(page) {
                 var type = $('#selCategory').val();
                 var state = $('#selStatus').val();
                 $.get({
@@ -336,27 +353,30 @@
                         page: page
                     },
                     success: function (backData) {
-                        var res = template('art_content', backData);
-                        $('tbody').html(res);
+                        if (backData.code == 200) {
+                            console.log(backData);
+
+                            var res = template('art_content', backData);
+                            $('tbody').html(res);
+                            var totalPages = backData.totalPage;
+                            
+                            // 重新搜索后获取到的页码与当前页码不一致 则不执行下面 重新绘制页码代码 
+                            if (totalPages != total_pages) {
+                                total_pages = totalPages;
+                                // var currentPage = $pagination.twbsPagination('getCurrentPage');
+                                $pagination.twbsPagination('destroy');
+                                $pagination.twbsPagination($.extend({}, defaultOpts, {
+                                    startPage: 1,
+                                    totalPages: totalPages
+                                }));
+                            }
+                        }
                     }
                 });
             }
+        
+            
 
-            //当页面加载后默认显示 
-            getData(1);
-
-            // 分页
-            $('.pagination').twbsPagination({
-                totalPages: 35,
-                visiblePages: 7,
-                first : '首页',
-                last : '尾页',
-                prev : '上一页',
-                next : '下一页',
-                onPageClick: function (event, page) {
-                    getData(page);
-                }
-            });
         });
 
     </script>
