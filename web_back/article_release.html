@@ -30,20 +30,20 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章标题：</label>
                     <div class="col-sm-10">
-                        <input type="email" class="form-control" id="inputEmail3" placeholder="文章标题">
+                        <input type="email" class="form-control" name = 'title' id="inputEmail3" placeholder="文章标题">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">文章封面：</label>
                     <div class="col-sm-10">
-                        <img src="./images/2.jpg" alt="" style="height : 120px " id = "file_img">
-                        <input type="file" id="exampleInputFile">
+                        <img src="./images/2.jpg" alt="" style="height : 120px " id="file_img">
+                        <input type="file" id="exampleInputFile" name = 'cover'>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control" id = "art_control">
+                        <select class="form-control" id="art_control" name = 'type'>
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
@@ -56,7 +56,7 @@
                     <label for="inputEmail3" class="col-sm-2 control-label">发布时间：</label>
                     <div class="col-sm-4">
                         <div class="input-group">
-                            <input type="text" class="form-control currentDate" placeholder="YYYY-MM-DD" id="dateinput">
+                            <input type="text" name = 'date' class="form-control currentDate" placeholder="YYYY-MM-DD" id="dateinput">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button"
                                     onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
@@ -68,14 +68,14 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
-                        <textarea class="form-control" id="rich_content" name="content" placeholder="文章内容">
+                        <textarea class="form-control" id="rich_content" placeholder="文章内容">
                             Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda fugiat illo nihil molestias ab. Laborum eius non atque, totam sapiente quae obcaecati assumenda ratione inventore pariatur maiores, qui libero delectus.
                             </textarea>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success">发布</button>
+                        <button type="submit" class="btn btn-success publish_art">发布</button>
                         <button type="submit" class="btn btn-default">存为草稿</button>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
     </div>
 
     <!-- 写一个模板 -->
-    <script type = "text/html" id = "art_category">
+    <script type="text/html" id="art_category">
         {{ each data v}}
         <option value = "{{ v.id }}">{{ v.name }}</option>
         {{ /each }}
@@ -92,28 +92,47 @@
 
 
     <script>
-        $(function(){
+        $(function () {
 
             // 文章封面图片预览
-            $('#exampleInputFile').on('change',function(){
+            $('#exampleInputFile').on('change', function () {
                 var url = URL.createObjectURL(this.files[0]);
-                $('#file_img').attr('src',url);
+                $('#file_img').attr('src', url);
             });
 
             // 当页面加载成功后,获取文章类别并展现在页面上
             $.get({
-                url : 'http://localhost:8000/admin/category_search',
-                success : function(backData){
-                    if(backData.code == 200){
-                        var res = template('art_category',backData);
+                url: 'http://localhost:8000/admin/category_search',
+                success: function (backData) {
+                    if (backData.code == 200) {
+                        var res = template('art_category', backData);
                         $('#art_control').html(res);
                     }
                 }
             });
 
             // 当页面加载成功后,moment.js插件获取指定格式的时间并展示在页面上
-           var currentDateStr = moment().format('YYYY-MM-DD');
-           $('.currentDate').val(currentDateStr);
+            var currentDateStr = moment().format('YYYY-MM-DD');
+            $('.currentDate').val(currentDateStr);
+
+            // 发布文章
+            $('.publish_art').on('click', function () {
+                var fmData = new FormData($('form')[0]);
+                fmData.append('content',tinyMCE.activeEditor.getContent());
+                fmData.append('state','草稿');
+                $.post({
+                    url: 'http://localhost:8000/admin/article_publish',
+                    data : fmData,
+                    contentType : false,
+                    processData : false,
+                    success : function(backData){
+                        if(backData.code == 201){
+                            alert('发布成功~~');
+                        }
+                    }
+                });
+            });
+
         });
     </script>
 
