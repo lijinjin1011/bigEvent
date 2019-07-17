@@ -253,7 +253,7 @@
 
             <div class="row text-center">
                 <ul class="pagination pagination-sm">
-                    <li class="page-item first disabled"><a href="#" class="page-link first_page">首页</a></li>
+                    <li class="page-item first disabled"><a href="#" class="page-link">首页</a></li>
                     <li class="page-item prev disabled"><a href="#" class="page-link">上一页</a></li>
                     <li class="page-item active"><a href="#" class="page-link">1</a></li>
                     <li class="page-item"><a href="#" class="page-link">2</a></li>
@@ -344,7 +344,7 @@
             $('#btnSearch').on('click', function (e) {
                 // 阻止筛选的默认跳转功能
                 e.preventDefault();
-                $('.first_page').trigger('click');
+                $('.page-link').trigger('click');
                 getData(1);
             });
 
@@ -381,12 +381,11 @@
                             $('tbody').html(res);
                             var totalPages = backData.totalPage;
 
+                            window.currentPage = $pagination.twbsPagination('getCurrentPage');
 
                             // 重新搜索后获取到的页码与当前页码不一致 则不执行下面 重新绘制页码代码 
                             if (totalPages != total_pages) {
                                 total_pages = totalPages;
-
-                                var currentPage = $pagination.twbsPagination('getCurrentPage');
 
                                 $pagination.twbsPagination('destroy');
                                 $pagination.twbsPagination($.extend({}, defaultOpts, {
@@ -404,6 +403,7 @@
                 $('#myModal').modal({});
                 var id = $(this).attr('data-id');
                 $('.btn-primary').on('click', function () {
+                    $('#myModal').modal('hide');
                     $.get({
                         url: 'http://localhost:8000/admin/article_delete',
                         data: {
@@ -411,11 +411,11 @@
                         },
                         success: function (backData) {
                             if (backData.code == 200) {
-                                getData();
+                                getData(currentPage);
                             }
                         }
                     });
-                    $('#myModal').modal('hide');
+                  
                 });
             });
         });
