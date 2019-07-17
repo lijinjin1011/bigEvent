@@ -215,11 +215,49 @@
             <span>|</span>
             <a href="#">招聘人才</a>
             <span>|</span>
-            <a href="#">友情链接</a>		
+            <a href="#">友情链接</a>
         </div>
-        <p>CopyRight © 2019 深圳大事件信息技术股份有限公司   All Rights Reserved</p>
-        <p>电话：0755-****888    粤ICP备*******8号</p>
+        <p>CopyRight © 2019 深圳大事件信息技术股份有限公司 All Rights Reserved</p>
+        <p>电话：0755-****888 粤ICP备*******8号</p>
     </div>
+
+    <!-- 导入JQuery -->
+    <script src="./js/jquery-1.12.4.min.js"></script>
+    <!-- 导入模板js文件 -->
+    <script src="./js/template-web.js"></script>
+    <!-- 写一个模板 -->
+    <script type="text/html" id="tpl">
+        {{ each }}
+        {{ if $index == 0}}
+        <li class="first">
+        {{ else }}
+        <li>
+        {{ /if }}
+            <a href="article.html?id={{ $value.id }}"><img src="{{ $value.cover }}" alt=""></a>
+            <p>{{ $value.title }}</p>
+        </li>
+        {{ /each }}
+    </script>
+
+    <script>
+        // 写一个入口函数
+        $(function () {
+
+            // 焦点新闻
+            $.get({
+                url: 'http://localhost:8000/admin/search',
+                data: {
+                    state: '草稿',
+                    perpage: 5
+                },
+                success: function (backData) {
+                    var res = template('tpl',backData.data);
+                    $('.focus_list').html(res);
+                }
+            });
+
+        });
+    </script>
 
 </body>
 
