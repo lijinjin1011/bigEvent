@@ -58,6 +58,7 @@
             <div class="breadcrumb">
                 当前位置： <a href="#">首页</a> &gt; <a href="#">科技</a> &gt; 文章详情
             </div>
+
             <h3 class="article_title">马斯克的新花样？连接人脑和电脑的初创公司又筹了一笔钱</h3>
             <div class="article_info">杰克 发布于 2019-05-08 07:08:46&nbsp;&nbsp;&nbsp;分类: 奇趣事&nbsp;&nbsp;&nbsp;阅读:
                 (98)&nbsp;&nbsp;&nbsp;评论: (0)</div>
@@ -205,6 +206,37 @@
         <p>电话：0755-****888 粤ICP备*******8号</p>
     </div>
 
+    <!-- 导入jQuery文件 -->
+    <script src="./js/jquery-1.12.4.min.js"></script>
+    <!-- 导入模板js文件 -->
+    <script src="./js/template-web.js"></script>
+    <!-- 写一个模板 -->
+    <script id="article_xq" type="text/html">
+        {{author}} 发布于 {{date}}&nbsp;&nbsp;&nbsp;分类: {{type}}&nbsp;&nbsp;&nbsp;阅读:
+        ({{read}})&nbsp;&nbsp;&nbsp;评论: ({{comment}})
+    </script>
+
+    <script>
+        // 写一个入口函数
+        $(function () {
+            // 当页面加载后,根据用户点击的信息id获取到详细信息并展示在页面上
+            var id = location.search.split('=')[1];
+            $.get({
+                url: 'http://localhost:8000/admin/search',
+                data: {
+                    id: id
+                },
+                success: function (backData) {
+                    if (backData.code == 200) {
+                        $('.article_title').text(backData.data.title);
+                        $('.article_con').html(backData.data.content);
+                        var resHtml = template('article_xq', backData.data);
+                        $('.article_info').html(resHtml);
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

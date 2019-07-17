@@ -248,11 +248,14 @@
                 url: 'http://localhost:8000/admin/search',
                 data: {
                     state: '草稿',
+                    page : 1,
                     perpage: 5
                 },
                 success: function (backData) {
-                    var res = template('tpl',backData.data);
-                    $('.focus_list').html(res);
+                    if (backData.code == 200) {
+                        var res = template('tpl', backData.data);
+                        $('.focus_list').html(res);
+                    }
                 }
             });
 
