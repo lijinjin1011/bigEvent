@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="css/iconfont.css">
     <link rel="stylesheet" href="css/main.css">
     <script src="js/jquery-1.12.4.min.js"></script>
+    <!-- 导入模态框js文件 -->
+    <script src="./js/bootstrap/js/bootstrap.min.js"></script>
 </head>
 
 <body>
@@ -251,7 +253,7 @@
 
             <div class="row text-center">
                 <ul class="pagination pagination-sm">
-                    <li class="page-item first disabled"><a href="#" class="page-link">首页</a></li>
+                    <li class="page-item first disabled"><a href="#" class="page-link first_page">首页</a></li>
                     <li class="page-item prev disabled"><a href="#" class="page-link">上一页</a></li>
                     <li class="page-item active"><a href="#" class="page-link">1</a></li>
                     <li class="page-item"><a href="#" class="page-link">2</a></li>
@@ -265,6 +267,26 @@
                 </ul>
             </div>
 
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">温馨提示!</h4>
+                </div>
+                <div class="modal-body">
+                    确认要删除吗
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary">确认</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -289,8 +311,8 @@
             <td class="text-center">{{ v.date }}</td>
             <td class="text-center">{{ v.state }}</td>
             <td class="text-center">
-                <a href="post-edit.html?id={{ v.id }}" class="btn btn-default btn-xs">编辑</a>
-                <a href="javascript:" data-id = "{{ v.id }}" class="btn btn-danger btn-xs">删除</a>
+                <a href="article_edit.html?id={{ v.id }}" class="btn btn-default btn-xs">编辑</a>
+                <a href="javascript:" data-id = "{{ v.id }}" class="btn btn-danger btn-xs art-del">删除</a>
             </td>
         </tr>
         {{ /each }}
@@ -322,11 +344,12 @@
             $('#btnSearch').on('click', function (e) {
                 // 阻止筛选的默认跳转功能
                 e.preventDefault();
+                $('.first_page').trigger('click');
                 getData(1);
             });
 
             // 分页  设置默认最大页码数为10
-            var total_pages = 10;   
+            var total_pages = 10;
 
             var $pagination = $('.pagination');
             var defaultOpts = {
@@ -354,16 +377,17 @@
                     },
                     success: function (backData) {
                         if (backData.code == 200) {
-                            console.log(backData);
-
                             var res = template('art_content', backData);
                             $('tbody').html(res);
                             var totalPages = backData.totalPage;
-                            
+
+
                             // 重新搜索后获取到的页码与当前页码不一致 则不执行下面 重新绘制页码代码 
                             if (totalPages != total_pages) {
                                 total_pages = totalPages;
-                                // var currentPage = $pagination.twbsPagination('getCurrentPage');
+
+                                var currentPage = $pagination.twbsPagination('getCurrentPage');
+
                                 $pagination.twbsPagination('destroy');
                                 $pagination.twbsPagination($.extend({}, defaultOpts, {
                                     startPage: 1,
@@ -374,7 +398,26 @@
                     }
                 });
             }
-        
+
+            // 删除tbody
+            $('tbody').on('click', '.art-del', function () {
+                $('#myModal').modal({});
+                var id = $(this).attr('data-id');
+                $('.btn-primary').on('click', function () {
+                    $.get({
+                        url: 'http://localhost:8000/admin/article_delete',
+                        data: {
+                            id: id
+                        },
+                        success: function (backData) {
+                            if (backData.code == 200) {
+                                getData();
+                            }
+                        }
+                    });
+                    $('#myModal').modal('hide');
+                });
+            });
         });
 
     </script>
